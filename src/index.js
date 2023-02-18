@@ -494,6 +494,7 @@ export default class CanvasDraw extends PureComponent {
 
     lines.forEach((line) => {
       const { points, brushColor, brushRadius } = line;
+      const isMoveToLineDisabled = line.isMoveToLineDisabled || false;
 
       // Draw all at once if immediate flag is set, instead of using setTimeout
       if (immediate) {
@@ -502,11 +503,12 @@ export default class CanvasDraw extends PureComponent {
           points,
           brushColor,
           brushRadius,
+          isMoveToLineDisabled,
         });
 
         // Save line with the drawn points
         this.points = points;
-        this.saveLine({ brushColor, brushRadius });
+        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled });
         return;
       }
 
@@ -518,6 +520,7 @@ export default class CanvasDraw extends PureComponent {
             points: points.slice(0, i + 1),
             brushColor,
             brushRadius,
+            isMoveToLineDisabled,
           });
         }, curTime);
       }
@@ -526,7 +529,7 @@ export default class CanvasDraw extends PureComponent {
       window.setTimeout(() => {
         // Save this line with its props instead of this.props
         this.points = points;
-        this.saveLine({ brushColor, brushRadius });
+        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled });
       }, curTime);
     });
   };
@@ -567,7 +570,7 @@ export default class CanvasDraw extends PureComponent {
     this.ctx.temp.stroke();
   };
 
-  saveLine = ({ brushColor, brushRadius } = {}) => {
+  saveLine = ({ brushColor, brushRadius, isMoveToLineDisabled } = {}) => {
     if (this.points.length < 2) return;
 
     // Save as new line
@@ -575,6 +578,7 @@ export default class CanvasDraw extends PureComponent {
       points: [...this.points],
       brushColor: brushColor || this.props.brushColor,
       brushRadius: brushRadius || this.props.brushRadius,
+      isMoveToLineDisabled: isMoveToLineDisabled || false,
     });
 
     // Reset points array
