@@ -507,6 +507,7 @@ export default class CanvasDraw extends PureComponent {
     lines.forEach((line) => {
       const { points, brushColor, brushRadius } = line;
       const isMoveToLineDisabled = line.isMoveToLineDisabled || false;
+      const isDestinationOver = line.isDestinationOver || false;
 
       // Draw all at once if immediate flag is set, instead of using setTimeout
       if (immediate) {
@@ -516,11 +517,12 @@ export default class CanvasDraw extends PureComponent {
           brushColor,
           brushRadius,
           isMoveToLineDisabled,
+          isDestinationOver,
         });
 
         // Save line with the drawn points
         this.points = points;
-        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled });
+        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled, isDestinationOver });
         return;
       }
 
@@ -533,6 +535,7 @@ export default class CanvasDraw extends PureComponent {
             brushColor,
             brushRadius,
             isMoveToLineDisabled,
+            isDestinationOver,
           });
         }, curTime);
       }
@@ -541,7 +544,7 @@ export default class CanvasDraw extends PureComponent {
       window.setTimeout(() => {
         // Save this line with its props instead of this.props
         this.points = points;
-        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled });
+        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled, isDestinationOver });
       }, curTime);
     });
   };
@@ -553,7 +556,13 @@ export default class CanvasDraw extends PureComponent {
     canvas.style.height = height;
   };
 
-  drawPoints = ({ points, brushColor, brushRadius }) => {
+  drawPoints = ({ points, brushColor, brushRadius, isDestinationOver }) => {
+    window.canvas = this.canvas;
+
+    if (isDestinationOver) {
+      this.ctx.drawing.globalCompositeOperation = 'destination-over';
+    }
+
     this.ctx.temp.lineJoin = "round";
     this.ctx.temp.lineCap = "round";
     this.ctx.temp.strokeStyle = brushColor;
@@ -582,7 +591,7 @@ export default class CanvasDraw extends PureComponent {
     this.ctx.temp.stroke();
   };
 
-  saveLine = ({ brushColor, brushRadius, isMoveToLineDisabled } = {}) => {
+  saveLine = ({ brushColor, brushRadius, isMoveToLineDisabled, isDestinationOver } = {}) => {
     if (this.points.length < 2) return;
 
     // Save as new line
@@ -591,6 +600,7 @@ export default class CanvasDraw extends PureComponent {
       brushColor: brushColor || this.props.brushColor,
       brushRadius: brushRadius || this.props.brushRadius,
       isMoveToLineDisabled: isMoveToLineDisabled || false,
+      isDestinationOver: isDestinationOver || false,
     });
 
     // Reset points array
