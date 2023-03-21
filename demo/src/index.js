@@ -7,6 +7,7 @@ import classNames from "./index.css";
 class Demo extends Component {
   state = {
     color: "#ffc600",
+    isDestinationOver: false,
     width: 400,
     height: 400,
     brushRadius: 10,
@@ -85,8 +86,24 @@ class Demo extends Component {
               border: "1px solid #272727"
             }}
           />
+          <input
+            type="checkbox"
+            onChange={(evt) => {
+              this.setState({
+                isDestinationOver: evt.target.checked,
+              });
+            }}
+            value={this.state.isDestinationOver}
+          />
+          <div>
+            isDestinationOver
+          </div>
         </div>
-        <CanvasDraw brushColor={this.state.color} />
+        <CanvasDraw
+          brushColor={this.state.color}
+          isDestinationOver={this.state.isDestinationOver}
+          onChange={(evt) => console.log(evt.lines)}
+        />
         <h2>Background Image</h2>
         <p>You can also set the `imgSrc` prop to draw on a background-image.</p>
         <p>

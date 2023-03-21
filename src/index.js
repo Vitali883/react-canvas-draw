@@ -62,6 +62,7 @@ export default class CanvasDraw extends PureComponent {
     mouseZoomFactor: PropTypes.number,
     zoomExtents: boundsProp,
     clampLinesToDocument: PropTypes.bool,
+    isDestinationOver: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -90,6 +91,7 @@ export default class CanvasDraw extends PureComponent {
     mouseZoomFactor: 0.01,
     zoomExtents: { min: 0.33, max: 3 },
     clampLinesToDocument: false,
+    isDestinationOver: false,
   };
 
   ///// public API /////////////////////////////////////////////////////////////
@@ -522,7 +524,7 @@ export default class CanvasDraw extends PureComponent {
 
         // Save line with the drawn points
         this.points = points;
-        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled, isDestinationOver });
+        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled });
         return;
       }
 
@@ -544,7 +546,7 @@ export default class CanvasDraw extends PureComponent {
       window.setTimeout(() => {
         // Save this line with its props instead of this.props
         this.points = points;
-        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled, isDestinationOver });
+        this.saveLine({ brushColor, brushRadius, isMoveToLineDisabled });
       }, curTime);
     });
   };
@@ -557,8 +559,10 @@ export default class CanvasDraw extends PureComponent {
   };
 
   drawPoints = ({ points, brushColor, brushRadius, isDestinationOver }) => {
-    if (isDestinationOver) {
+    if (isDestinationOver || this.props.isDestinationOver) {
       this.ctx.drawing.globalCompositeOperation = 'destination-over';
+    } else {
+      this.ctx.drawing.globalCompositeOperation = 'source-over';
     }
 
     this.ctx.temp.lineJoin = "round";
@@ -589,7 +593,7 @@ export default class CanvasDraw extends PureComponent {
     this.ctx.temp.stroke();
   };
 
-  saveLine = ({ brushColor, brushRadius, isMoveToLineDisabled, isDestinationOver } = {}) => {
+  saveLine = ({ brushColor, brushRadius, isMoveToLineDisabled } = {}) => {
     if (this.points.length < 2) return;
 
     // Save as new line
@@ -598,7 +602,7 @@ export default class CanvasDraw extends PureComponent {
       brushColor: brushColor || this.props.brushColor,
       brushRadius: brushRadius || this.props.brushRadius,
       isMoveToLineDisabled: isMoveToLineDisabled || false,
-      isDestinationOver: isDestinationOver || false,
+      isDestinationOver: this.props.isDestinationOver,
     });
 
     // Reset points array
