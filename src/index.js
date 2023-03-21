@@ -557,8 +557,6 @@ export default class CanvasDraw extends PureComponent {
   };
 
   drawPoints = ({ points, brushColor, brushRadius, isDestinationOver }) => {
-    window.canvas = this.canvas;
-
     if (isDestinationOver) {
       this.ctx.drawing.globalCompositeOperation = 'destination-over';
     }
